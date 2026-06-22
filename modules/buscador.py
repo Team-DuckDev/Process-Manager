@@ -46,21 +46,25 @@ class BuscadorProcessos:
         return lista_ordenada
     
     def obter_detalhes_do_processo(self, pid: int) -> dict:
-        """Busca métricas avançadas de um PID específico"""
+        """Busca métricas avançadas de um PID específico."""
         try:
             proc = psutil.Process(pid)
-        
             nice_atual = proc.nice()
 
             tempo_segundos = proc.cpu_times().user
             tempo_formatado = f"{int(tempo_segundos // 60)}m {int(tempo_segundos % 60)}s"
 
+            cpu_percent = proc.cpu_percent(interval=0.1)
+            ram_percent = proc.memory_percent()
+
             return {
                 "nice": nice_atual,
-                "time": tempo_formatado
+                "time": tempo_formatado,
+                "cpu": f"{cpu_percent:.1f}%",
+                "ram": f"{ram_percent:.1f}%"
             }
         except (psutil.NoSuchProcess, psutil.AccessDenied):
-            return {"nice": "N/A", "time": "N/A"}
+            return {"nice": "N/A", "time": "N/A", "cpu": "N/A", "ram": "N/A"}
     
     def obter_usuarios_do_sistema(self) -> list:
         """Lê o sistema Linux e retorna uma lista com

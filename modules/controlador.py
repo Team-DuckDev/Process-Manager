@@ -1,5 +1,7 @@
 import os
 import signal
+import shlex
+import subprocess
 import psutil
 
 
@@ -80,6 +82,26 @@ class ControladorProcessos:
 
             return True
 
+        except Exception:
+            return False
+
+    def executar_processo(self, comando: str, novo_nice: int | None = None) -> bool:
+        """
+        Executa um novo processo a partir de um comando de shell.
+        """
+        if not comando.strip():
+            return False
+
+        argumentos = shlex.split(comando)
+        try:
+            if novo_nice is not None:
+                subprocess.Popen(
+                    argumentos,
+                    preexec_fn=lambda: os.nice(novo_nice)
+                )
+            else:
+                subprocess.Popen(argumentos)
+            return True
         except Exception:
             return False
 
